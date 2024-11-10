@@ -1,0 +1,119 @@
+{
+	"application": "yudao-cloud-mall",
+	"theme": "indigo",
+	"page_name": "home",
+	"layout": "TopBanner",
+	"content": "layout-top-banner",
+	"layouts": {
+		"components": [
+			{
+				"type": "banner",
+				"position": "header",
+				"widget_id": "header-banner",
+				"subtype": "header-banner",
+				"children": [
+					{
+						"type": "logo",
+						"widget_id": "header-logo",
+						"subtype": "svg-logo",
+						"props": {
+							"logo_src": "mystic_{environmentId}_logo",
+							"link": "{dashboard}"
+						}
+					},
+					{
+						"type": "auth",
+						"widget_id": "header-authbox",
+						"position": "header-corner",
+						"subtype": "auth-corner",
+						"props": {
+							"login-button": {
+								"copy": "Log in"
+							}
+						},
+						"children": [
+							{
+								"type": "modal",
+								"widget_id": "header-authbox-modal-basic",
+								"subtype": "basic",
+								"props": {
+									"modal-inner-type": "auth"
+								},
+								"children": [
+									{
+										"type": "auth",
+										"widget_id": "header-authbox-modal-basic-inner",
+										"position": "auth-modal-body",
+										"subtype": "auth-modal",
+										"props": {
+											"display_logo": true,
+											"logo_src": "mystic_{environmentId}_logo",
+											"auth_type": "user_pass",
+											"welcome_msg": "Welcome to Mystic Shop"
+										},
+										"children": [
+											{
+												"type": "form",
+												"widget_id": "header-authbox-auth-form",
+												"subtype": "auth-form",
+												"props": {
+													"use_email": true,
+													"inputs": {
+														"email": {
+															"copy": "Email",
+															"placeholder": "Email"
+														},
+														"password": {
+															"copy": "Password",
+															"placeholder": "Password"
+														}
+													},
+													"forgot_pass": "Forgot your password?",
+													"login-button": {
+														"service": "user_pass_login",
+														"copy": "Log in"
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						]
+					},
+					{
+						"type": "menu",
+						"position": "header-nav",
+						"widget_id": "header-nav-menu",
+						"subtype": "nav-menu",
+						"children": [
+							{
+								"type": "menu-items",
+								"position": "header",
+								"widget_id": "header-nav-item",
+								"service": "loadNavMenuItems"
+							}
+						]
+					},
+					{
+						"type": "search-bar",
+						"position": "header-nav",
+						"widget_id": "header-search-bar",
+						"subtype": null,
+						"children": [],
+						"props": {
+							"categories": []
+						}
+					},
+					{
+						"type": "menu",
+						"position": "header-nav",
+						"widget_id": "header-nav-tools",
+						"subtype": "nav-tools",
+						"children": []
+					}
+				]
+			}
+		]
+	}
+}

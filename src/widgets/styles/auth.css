@@ -1,0 +1,36 @@
+.auth-modal-wrapper .modal-default {
+  background-color: rgb(255, 255, 255);
+  border-radius: 32px;
+  position: relative;
+  text-align: center;
+  margin: auto;
+  min-height: initial;
+  box-shadow: rgba(0, 0, 0, 0.45) 0px 2px 10px;
+  width: 484px;
+  .modal-body {
+    min-height: 400px;
+    padding: 20px 10px 24px;
+    margin-bottom: 20px;
+  }
+  .welcome-msg {
+    color: #333;
+    margin-top: 0;
+    font-size: 28px;
+  }
+}
+
+.auth-form-wrapper {
+  margin: 0px auto;
+  width: 300px;
+  .auth-form-input-body {
+    button {
+      width: 100%;
+      background-color: #5e54a7;
+      color: #fff;
+    }
+    button:hover {
+      background-color: #332e57;
+      color: #fff;
+    }
+  }
+}

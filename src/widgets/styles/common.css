@@ -1,0 +1,129 @@
+a {
+  text-decoration: none;
+  color: #000;
+}
+
+.normal-size-logo img {
+  width: 64px;
+}
+
+.simple-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #fff;
+  color: #332e57;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: background-color 0.3s ease;
+  border: 0px;
+  cursor: pointer;
+  font-weight: bold;
+  .btn-label-wrapper {
+    font-size: 16px;
+  }
+}
+
+.simple-btn:hover {
+  background-color: #ccc;
+}
+
+.simple-link {
+  cursor: pointer;
+}
+
+.modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+}
+
+.modal-dialog {
+  height: 100%;
+  display: flex;
+  min-height: 0px;
+  position: relative;
+  opacity: 1;
+  border-radius: 6px;
+  margin: 0px auto;
+}
+
+.modal-close-wrapper {
+  height: 40px;
+  width: 40px;
+  margin: 16px 16px 0px 16px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  text-align: center;
+}
+
+.modal-close-btn {
+  cursor: pointer;
+  font-size: 24px;
+  background-color: transparent;
+  width: 40px;
+  height: 40px;
+  border: 0px;
+  border-radius: 50%;
+  .modal-close-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  img {
+    vertical-align: middle;
+  }
+}
+
+.modal-close-btn:hover {
+  background-color: #eee;
+}
+
+.form-label {
+  margin-left: 8px;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.form-input {
+  input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    min-height: 48px;
+    appearance: none;
+    border-style: solid;
+    border-width: 2px;
+  }
+}
+
+.form-input::-webkit-input-placeholder {
+  font-family: "Roboto Slab", serif;
+}
+
+.form-input:-ms-input-placeholder {
+  font-family: "Roboto Slab", serif;
+}
+
+.form-input:-moz-placeholder {
+  font-family: "Roboto Slab", serif;
+}
+
+.form-input::-moz-placeholder {
+  font-family: "Roboto Slab", serif;
+}
+
+.form-forgot-pass {
+  text-align: left;
+}
+
+.form-submit-wrapper {
+  margin-top: 16px;
+}

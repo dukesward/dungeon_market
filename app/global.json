@@ -1,0 +1,21 @@
+{
+  "settings": {
+    "mongodb": {
+      "uri": "mongodb://0.0.0.0:27017",
+      "database": "mystic"
+    }
+  },
+  "modules": {
+    "location": "app/modules",
+    "home": {
+      "path": "home",
+      "routes": [
+        {
+          "path": "/",
+          "method": "GET",
+          "handler": "homeController.getHome"
+        }
+      ]
+    }
+  }
+}

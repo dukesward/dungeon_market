@@ -1,8 +1,6 @@
 import { AppContent, AppFeature, AppLayout, AppWidget } from "./types";
 import { BaseWidget } from "../widgets/BaseWidget";
 import { resolveFeature, resolveWidget } from "./widgets";
-import apiServiceDelegator from "../components/ApiServiceDelegator";
-import PageContentService from "../components/services/PageContentService";
 import { Observable } from "rxjs";
 
 class BaseLayout extends BaseWidget {

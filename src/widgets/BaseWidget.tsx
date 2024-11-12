@@ -1,5 +1,5 @@
 import { Component, SyntheticEvent } from "react";
-import { AppWidget } from "../layouts/types";
+import { AppWidget, ErrorHandler } from "../layouts/types";
 import { resolveWidget } from "../layouts/widgets";
 import { AppContext, appContext } from "../AppContext";
 
@@ -23,6 +23,7 @@ class BaseWidget extends Component<BaseWidgetProps, BaseWidgetStates> {
   children: AppWidget[] = []
   pageName?: string;
   dataEmitters: {[key: string]: () => void} = {}
+  errorHandler?: ErrorHandler;
   constructor(props: BaseWidgetProps) {
     super(props);
     this.state = {

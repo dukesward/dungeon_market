@@ -4,27 +4,33 @@ import PageLayoutService from "./services/PageLayoutService";
 import { ApiDelegatorConfig, ApiDelegatorConfigurer } from "../layouts/types";
 import UserPassLoginService from "./services/UserPassLoginService";
 import TenantService from "./services/TenantService";
+import ConstantService from "./services/ConstantService";
 
 class ApiServiceDelegator {
   static delegator: ApiServiceDelegator
   services: {[service_id: string]: ApiDelegatorConfigurer}
   private constructor() {
     this.services = {};
+    this.registerService('error_code_constants', new ApiDelegatorConfigurer({
+      'service': new ConstantService(),
+      'method': HttpMethod.GET,
+      'serviceId': 'error_code_constants'
+    }));
     this.registerService('page_layout', new ApiDelegatorConfigurer({
       'service': new PageLayoutService(),
       'method': HttpMethod.GET,
       'serviceId': 'page_layout'
     }));
-    this.registerService('user-pass-login', new ApiDelegatorConfigurer({
+    this.registerService('user_pass_login', new ApiDelegatorConfigurer({
       'service': new UserPassLoginService(),
       'method': HttpMethod.POST,
-      'serviceId': 'user-pass-login',
+      'serviceId': 'user_pass_login',
       //'uri': "auth/simple/login"
     }));
-    this.registerService('tenant-id', new ApiDelegatorConfigurer({
+    this.registerService('tenant_id', new ApiDelegatorConfigurer({
       'service': new TenantService(),
       'method': HttpMethod.GET,
-      'serviceId': 'tenant-id',
+      'serviceId': 'tenant_id',
       //'uri': 'tenant/get-id-by-name',
       'params': {
         'name': '{tenant_name}'

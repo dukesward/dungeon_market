@@ -18,11 +18,12 @@ type HttpRequest<T> = {
 
 abstract class AppHttpServiceConsumer<T> {
   api_base: string
+  api_app?: string
   last_call: HttpRequest<T>
   next_fetch: {[page_name: string]: Observable<T | null>}
   services: {[service_id: string]: string} = {}
   constructor() {
-    this.api_base = appContext.envVar('appServerApiBase');
+    this.api_base = appContext.envVar('APP_SERVER_API_BASE');
     this.last_call = {}
     this.next_fetch = {};
   }
@@ -39,14 +40,23 @@ abstract class AppHttpServiceConsumer<T> {
   // abstract fetch(apiConfig: ApiDelegatorConfig, callback?: (t: T) => void): Observable<T | null>;
 
   buildUrl(uri: string, params?: any): string {
-    let url = `${this.api_base}${uri}`;
+    let api_app = this.api_app || '';
+    let url = `${this.api_base}${api_app}${uri}`;
     if(params && Object.keys(params).length > 0) {
       url += '?';
       Object.keys(params).forEach(key => {
-        url += (key + '=' + params[key] + '&');
+        url += (key + '=' + this.findParam(key, params) + '&');
       });
     }
     return url;
+  }
+
+  findParam(key: string, params?: any) {
+    if(params && params[key]) {
+      return params[key];
+    } else {
+      return appContext.envVar(key);
+    }
   }
   
   doFetch(

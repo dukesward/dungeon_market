@@ -2,6 +2,7 @@ import applyHeaderFeatures from "../apps/features/header";
 import authWidgetFactory from "../widgets/Auth";
 import bannerFactory from "../widgets/Banner"
 import { BaseWidget } from "../widgets/BaseWidget";
+import { errorMessageFactory } from "../widgets/ErrorHandler";
 import menuFactory from "../widgets/Menu";
 import modalWidgetFactory from "../widgets/Modal";
 import { AppWidget, FeatureWrapperMap, WidgetWrapperMap } from "./types"
@@ -10,7 +11,8 @@ const WidgetSupplier: WidgetWrapperMap = {
   "banner": bannerFactory,
   "menu": menuFactory,
   "auth": authWidgetFactory,
-  "modal": modalWidgetFactory
+  "modal": modalWidgetFactory,
+  "error": errorMessageFactory
 }
 
 const FeatureSupplier: FeatureWrapperMap = {

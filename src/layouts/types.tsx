@@ -39,6 +39,15 @@ type ApiDelegatorConfig = {
   payload: any
 }
 
+type SimpleMap<T> = {
+  [key: string]: T
+}
+
+interface ErrorHandler {
+  handle(error: any): void
+  renderPopupList(): JSX.Element
+}
+
 class ApiDelegatorConfigurer {
   method: HttpMethod
   serviceId: string
@@ -219,6 +228,16 @@ class TenantIdResponse implements AppModel {
   }
 }
 
+class ErrorMessageWrapper implements AppModel {
+  type: string
+  errorCode: string
+  function: string
+  constructor(data: any) {
+    this.type = data.type;
+    this.errorCode = data.code;
+    this.function = data.function;
+  }
+}
 
 
 export {
@@ -230,15 +249,18 @@ export {
   AppContent,
   UserPassLogin,
   TenantIdResponse,
-  ApiDelegatorConfigurer
+  ApiDelegatorConfigurer,
+  ErrorMessageWrapper
 };
 
 export type {
+  SimpleMap,
   LayoutMap,
   LayoutWrapperMap,
   WidgetMap,
   WidgetWrapperMap,
   FeatureWrapperMap,
   UserPassAuthForm,
-  ApiDelegatorConfig
+  ApiDelegatorConfig,
+  ErrorHandler
 };

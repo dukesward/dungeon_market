@@ -5,6 +5,9 @@ import { Observable, Subscription } from "rxjs";
 class PageContentService extends AppHttpServiceConsumer<AppContent> {
   constructor() {
     super();
+    this.services = {
+      'page_content': '/content/{page_name}'
+    }
   }
   mapObject(data: any): AppContent {
     let appContent: AppContent = new AppContent(data.contents);

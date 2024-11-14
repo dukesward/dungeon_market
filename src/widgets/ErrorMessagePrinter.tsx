@@ -14,7 +14,6 @@ class ErrorMessagePrinter extends ErrorHandler {
     });
   }
   componentDidMount(): void {
-    console.log('error message printer is ready');
     this.setCustomState('messages', []);
   }
   handle(error: ErrorMessageWrapper): void {

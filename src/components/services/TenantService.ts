@@ -5,6 +5,7 @@ import { appContext } from "../../../src/AppContext";
 class TenantService extends AppHttpServiceConsumer<TenantIdResponse> {
   constructor() {
     super();
+    this.api_app = appContext.envVar('API_ADMIN_SYSTEM_BASE');
     this.services = {
       'tenant_id': 'tenant/get-id-by-name'
     }

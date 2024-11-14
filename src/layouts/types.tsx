@@ -36,7 +36,8 @@ type ApiDelegatorConfig = {
   method: HttpMethod,
   uri: string,
   params: any,
-  payload: any
+  payload: any,
+  headers: any
 }
 
 type SimpleMap<T> = {
@@ -49,12 +50,14 @@ class ApiDelegatorConfigurer {
   service: AppHttpServiceConsumer<any>
   params?: any = {}
   payload?: any = {}
+  headers?: any = {}
   constructor(config: any) {
     this.method = config.method;
     this.serviceId = config.serviceId;
     this.service = config.service;
     if(config.params) this.params = config.params;
     if(config.payload) this.payload = config.payload;
+    if(config.headers) this.headers = config.headers;
   }
   invoke(params?: any): Observable<any> {
     let uri = this.service.getServiceUri(this.serviceId);
@@ -70,12 +73,18 @@ class ApiDelegatorConfigurer {
           this.payload[key] = params[key];
         };
       });
+      Object.keys(this.headers).forEach(key => {
+        if(typeof params[key] !== 'undefined') {
+          this.headers[key] = params[key];
+        };
+      });
     }
     return this.service.doFetch({
       method: this.method,
       uri: uri,
       params: this.params,
-      payload: this.payload
+      payload: this.payload,
+      headers: this.headers
     });
   }
 }
@@ -178,7 +187,6 @@ class AppLayout implements AppModel {
     this.content_api = data['content'];
     if('layouts' in data) {
       this.layout_config = new AppLayoutConfig({...data['layouts']});
-      console.log(this.layout_config);
     }else {
       // complains that layouts do not exist
     }
@@ -212,6 +220,17 @@ class UserPassLogin implements AppModel {
   }
 }
 
+class AuthTokenEntity implements AppModel {
+  access_token: string
+  refresh_token: string
+  expires_in: number
+  constructor(data: any) {
+    this.access_token = data.access_token;
+    this.refresh_token = data.refresh_token;
+    this.expires_in = data.expires_in;
+  }
+}
+
 class TenantIdResponse implements AppModel {
   code: number
   data: number
@@ -229,6 +248,7 @@ class ErrorMessageWrapper implements AppModel {
   message?: string | null
   function: string
   constructor(data: ServiceCallError) {
+    console.log(data);
     this.type = data.get('type');
     this.errorCode = data.get('code');
     this.message = appContext.getConstant('error_code', this.errorCode) || null;
@@ -260,6 +280,7 @@ export {
   AppFeature,
   AppContent,
   UserPassLogin,
+  AuthTokenEntity,
   TenantIdResponse,
   ApiDelegatorConfigurer,
   ErrorMessageWrapper,

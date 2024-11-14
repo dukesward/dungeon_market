@@ -6,7 +6,7 @@ const topBannerLayout = (widgets: AppLayout) => {
   class TopBannerLayout extends BaseLayout {
     layout?: AppLayout = widgets;
     doConfigure() {
-      console.log('topBannerLayout is ready');
+      // console.log('topBannerLayout is ready');
     }
     doRender(): JSX.Element {
       let dom: JSX.Element = (

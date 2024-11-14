@@ -96,9 +96,9 @@ class BaseWidget extends Component<BaseWidgetProps, BaseWidgetStates> {
     return child;
   }
 
-  renderChildWidget(widgetId: string): JSX.Element | null {
+  renderChildWidget(widgetId: string, condition?: (c?: AppWidget) => boolean): JSX.Element | null {
     if(this.children) {
-      let child = this.findChild(c => c.widget_id === widgetId);
+      let child = this.findChild(c => c.widget_id === widgetId && (condition ? condition(c) : true));
       let element: JSX.Element = <></>;
       if(child) {
         let Widget: typeof BaseWidget | null = resolveWidget(child.type, child);
@@ -139,7 +139,7 @@ class BaseWidget extends Component<BaseWidgetProps, BaseWidgetStates> {
   }
 
   triggerEvent(event: string): () => void {
-    console.log(`trigger event ${event}`)
+    // console.log(`trigger event ${event}`)
     return this.dataEmitters[event];
   }
 

@@ -14,7 +14,6 @@ const modalWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
       console.log('modalWidget is ready');
     }
     doRender(): JSX.Element {
-      console.log(_widget);
       let dom: JSX.Element = (
         <div className={`modal-wrapper ${_widget?.prop('modal-inner-type')}-modal-wrapper`}>
           <div className="modal-dialog">

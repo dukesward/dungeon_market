@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Observable, Subscription, defer, map, share } from "rxjs";
+import { Observable, defer, map, share } from "rxjs";
 import { appContext } from "../AppContext";
 import { ApiDelegatorConfig, ServiceCallError } from "../layouts/types";
 
@@ -70,12 +70,12 @@ abstract class AppHttpServiceConsumer<T> {
   doFetch(
     apiConfig: ApiDelegatorConfig,
     callback?: (t: T) => any): Observable<T | null> {
-    let {uri, method, params, payload} = apiConfig;
+    let {uri, method, params, payload, headers} = apiConfig;
     params = this.customParams(params);
     return defer(() => axios({
       'url': this.buildUrl(uri, params),
       'method': method.toString(),
-      'headers': {...this.customHeaders(params), ...{
+      'headers': {...this.customHeaders(headers), ...{
         "Content-Type": "application/json"
       }},
       'data': payload

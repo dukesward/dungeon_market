@@ -5,6 +5,7 @@ import "./styles/auth.css";
 import apiServiceDelegator from "../components/ApiServiceDelegator";
 import { SyntheticEvent } from "react";
 import axios from "axios";
+import commonUtils from "../utils/commonUtils";
 
 
 const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
@@ -18,7 +19,6 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
         this.widget = props.widget;
     }
     componentDidMount() {
-      console.log('userPassAuthForm is mounted');
       this.setState({
         formData: {
           "email": "",
@@ -43,14 +43,14 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
                 <label>{this.widget.prop('inputs->' + userInputName + '->copy')}</label>
               </div>
               <div className="auth-form-input-body form-input">
-                <input type="text"
+                <input type="text" name={userInputName}
                 placeholder={this.widget.prop('inputs->' + userInputName + '->placeholder')}></input>
               </div>
               <div className="auth-form-input-label form-label">
                 <label>{this.widget.prop('inputs->password->copy')}</label>
               </div>
               <div className="auth-form-input-body form-input">
-                <input type="password"
+                <input type="password" name="password"
                 placeholder={this.widget.prop('inputs->password->placeholder')}></input>
               </div>
               <div className="form-forgot-pass">
@@ -70,17 +70,19 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
     handleFormSubmit(e: SyntheticEvent<HTMLFormElement>): void {
       e.preventDefault();
       let service = this.widget.prop('login-button->service');
+      let userInputName = this.widget.prop("use_email") ? "email": "username";
       if(service && e.target) {
         const form = e.target;
-        const formData = new FormData(form as HTMLFormElement);
-        console.log(`triggering ${service} login`);
+        const formData = new FormData(e.currentTarget);
+        formData.append(userInputName, commonUtils.getPropByKey(`${userInputName}->value`, e.target));
+        formData.append('password', commonUtils.getPropByKey('password->value', e.target));
         this.setState({
           formData: {
             'email': formData.get('email') as string,
             'password': formData.get('password') as string
           }
         }, () => {
-          let formData = this.state.formData;
+          let formData = this.state.formData || {};
           this.appContext()
           .getTenantId()
           .subscribe(
@@ -117,7 +119,7 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
     type: string = _widget.type;
     subtype: string = _widget.subtype || "basic";
     doConfigure() {
-      console.log('authModal is ready');
+      // console.log('authModal is ready');
     }
     doRender(): JSX.Element {
       let logo = this.widget.parsedProp('logo_src');
@@ -157,7 +159,6 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
       this.children = _widget.children || [];
     }
     doConfigure() {
-      console.log('authWidget is ready');
       this.addDataEmitter("close-modal", () => {
         this.setState({
           displayChild: {
@@ -193,10 +194,36 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
       }
     }
   }
+  class UserCorner extends BaseWidget {
+    widget: AppWidget = _widget;
+    type: string = _widget.type;
+    subtype: string = _widget.subtype || "basic";
+    constructor(props: BaseWidgetProps) {
+      super(props);
+      this.state.displayChild['auth-modal'] = false;
+      this.children = _widget.children || [];
+    }
+    doConfigure() {
+      console.log('user corner is ready');
+    }
+    doRender(): JSX.Element {
+      let dom: JSX.Element = (
+        <div className={`auth-${this.subtype}-wrapper`}>
+          <div className={`auth-${this.subtype}`}>
+            <div className="auth-user-avatar">
+              this is an avatar
+            </div>
+          </div>
+        </div>
+      )
+      return dom;
+    }
+  }
   let Widget: typeof BaseWidget | undefined = ({
    "basic": BaseWidget,
    "auth-modal": AuthModal,
-   "auth-corner": AuthCorner
+   "auth-corner": AuthCorner,
+   "user-corner": UserCorner
   })[_widget.subtype || "basic"];
   return Widget || BaseWidget;
 }

@@ -19,7 +19,8 @@ export const CACHE_KEY: {[key: string]: string} = {
   DICT_CACHE: 'dictCache',
   // 登录表单
   LoginForm: 'loginForm',
-  TenantId: 'tenantId'
+  TenantId: 'tenantId',
+  AuthToken: 'authToken'
 }
 
 class AppContext {
@@ -49,6 +50,15 @@ class AppContext {
     });
     console.log('appContext initialized');
   }
+  async validateToken(): Promise<boolean> {
+    let token: string = this.getWebCache(CACHE_KEY.AuthToken) || '';
+    if(token) {
+      return true;
+    }else {
+      return false;
+    } {
+    }
+  }
   envVar(name: string): string {
     return env[name] || env_configs[name];
   }
@@ -72,7 +82,7 @@ class AppContext {
       this.stateHooks['error_message'](e);
     }
   }
-  getTenantId(): Observable<TenantIdResponse> {
+  getTenantId(params?: any): Observable<TenantIdResponse> {
     let tenantId: string = this.getWebCache(CACHE_KEY.TenantId) || '';
     if(tenantId) {
       return new Observable<TenantIdResponse>(observer => {
@@ -86,13 +96,16 @@ class AppContext {
     }else {
       return apiServiceDelegator.getService(
         'tenant_id',
-        {}
+        params || {}
       ).pipe(
         tap((data: TenantIdResponse) => {
-          this.setWebCache(CACHE_KEY.TenantId, data.data.toString());
+          this.setWebCache('TenantId', data.data.toString());
         })
       );
     }
+  }
+  isPostLogin(): boolean {
+    return this.getWebCache('AuthToken') !== null;
   }
 }
 

@@ -5,6 +5,7 @@ import { ApiDelegatorConfigurer } from "../layouts/types";
 import UserPassLoginService from "./services/UserPassLoginService";
 import TenantService from "./services/TenantService";
 import ConstantService from "./services/ConstantService";
+import AuthTokenService from "./services/AuthTokenService";
 
 class ApiServiceDelegator {
   static delegator: ApiServiceDelegator
@@ -25,6 +26,13 @@ class ApiServiceDelegator {
       'service': new UserPassLoginService(),
       'method': HttpMethod.POST,
       'serviceId': 'user_pass_login',
+      'payload': {
+        'email': '{email}',
+        'password': '{password}'
+      },
+      'headers': {
+        'tenant_id': '{tenant_id}'
+      }
       //'uri': "auth/simple/login"
     }));
     this.registerService('tenant_id', new ApiDelegatorConfigurer({
@@ -32,6 +40,11 @@ class ApiServiceDelegator {
       'method': HttpMethod.GET,
       'serviceId': 'tenant_id',
       //'uri': 'tenant/get-id-by-name',
+    }));
+    this.registerService('validate_token', new ApiDelegatorConfigurer({
+      'service': new AuthTokenService(),
+      'method': HttpMethod.POST,
+      'serviceId': 'validate_token',
     }));
   }
   static getApiServiceDelegator(): ApiServiceDelegator {

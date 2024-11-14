@@ -38,7 +38,7 @@ const bannerFactory = (_widget: AppWidget): typeof BaseWidget => {
       let dom: JSX.Element = (
         <div className={`banner-${this.subtype}`}>
           {this.renderHeaderLogo()}
-          {this.renderChildWidget('header-authbox')}
+          {this.renderChildWidget('header-authbox', (c) => !!c?.prop('post-login') === this.appContext().isPostLogin())}
         </div>
       )
       return dom;

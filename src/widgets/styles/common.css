@@ -3,6 +3,15 @@ a {
   color: #000;
 }
 
+.error-popup-wrapper {
+  color: #fff;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  z-index: 10000;
+}
+
 .normal-size-logo img {
   width: 64px;
 }

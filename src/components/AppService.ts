@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Observable, Subscription, defer, map, share } from "rxjs";
 import { appContext } from "../AppContext";
-import { ApiDelegatorConfig } from "../layouts/types";
+import { ApiDelegatorConfig, ServiceCallError } from "../layouts/types";
 
 enum HttpMethod {
   GET = "GET",
@@ -58,24 +58,33 @@ abstract class AppHttpServiceConsumer<T> {
       return appContext.envVar(key);
     }
   }
+
+  customParams(params: any) {
+    return params;
+  }
+
+  customHeaders(params: any) {
+    return {};
+  }
   
   doFetch(
     apiConfig: ApiDelegatorConfig,
     callback?: (t: T) => any): Observable<T | null> {
     let {uri, method, params, payload} = apiConfig;
+    params = this.customParams(params);
     return defer(() => axios({
       'url': this.buildUrl(uri, params),
       'method': method.toString(),
-      'headers': {
-        "Content-Type": "application/json",
-      },
+      'headers': {...this.customHeaders(params), ...{
+        "Content-Type": "application/json"
+      }},
       'data': payload
     })).pipe(
       map(res => res.data),
       map(data => {
         if(!this.validate(data)) {
           // this.last_call.error = new Error("data_invalid");
-          throw this.last_call.error || new Error("data_invalid");
+          throw this.last_call.error || new ServiceCallError("data_invalid", data);
         }
         return this.mapObject(data);
       }),

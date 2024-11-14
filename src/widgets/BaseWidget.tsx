@@ -1,7 +1,8 @@
 import { Component, SyntheticEvent } from "react";
-import { AppWidget, ErrorHandler } from "../layouts/types";
+import { AppWidget, ServiceCallError } from "../layouts/types";
 import { resolveWidget } from "../layouts/widgets";
 import { AppContext, appContext } from "../AppContext";
+import axios from "axios";
 
 interface BaseWidgetProps {
   widget?: AppWidget | null;
@@ -23,7 +24,6 @@ class BaseWidget extends Component<BaseWidgetProps, BaseWidgetStates> {
   children: AppWidget[] = []
   pageName?: string;
   dataEmitters: {[key: string]: () => void} = {}
-  errorHandler?: ErrorHandler;
   constructor(props: BaseWidgetProps) {
     super(props);
     this.state = {
@@ -61,12 +61,31 @@ class BaseWidget extends Component<BaseWidgetProps, BaseWidgetStates> {
     return {...this.props, ...props};
   }
 
+  prop(key: string): any {
+    return this.widget?.prop(key);
+  }
+
   typeIs(type: string): boolean {
     return this.type === type;
   }
 
   subtypeIs(subtype: string): boolean {
     return this.subtype === subtype;
+  }
+
+  getCustomState(key: string): any {
+    let customStates = this.state.customStates;
+    if(!customStates) customStates = {};
+    return customStates[key];
+  }
+
+  setCustomState(key: string, value: any): void {
+    let customStates = this.state.customStates;
+    if(!customStates) customStates = {};
+    customStates[key] = value;
+    this.setState({
+      customStates: customStates
+    })
   }
 
   findChild(condition: (c: AppWidget) => boolean): AppWidget | null {
@@ -122,6 +141,21 @@ class BaseWidget extends Component<BaseWidgetProps, BaseWidgetStates> {
   triggerEvent(event: string): () => void {
     console.log(`trigger event ${event}`)
     return this.dataEmitters[event];
+  }
+
+  onServiceCallErrorHandle(e: any): void {
+    if(axios.isAxiosError(e)) {
+      this.appContext().handleServiceCallError(new ServiceCallError(e.message, {
+        "type": "simple",
+        "code": e.response?.status || 500,
+        "msg": e.response?.data?.message || "unknown",
+        "name": e.name
+      }));
+    }else if(e instanceof ServiceCallError) {
+      this.appContext().handleServiceCallError(e);
+    }else {
+      console.log(e);
+    }
   }
 }
 

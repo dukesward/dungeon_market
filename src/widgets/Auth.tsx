@@ -1,9 +1,10 @@
-import { AppWidget } from "../layouts/types";
+import { AppWidget, ServiceCallError, TenantIdResponse } from "../layouts/types";
 import { BaseWidget, BaseWidgetProps } from "./BaseWidget";
 import "./styles/common.css";
 import "./styles/auth.css";
 import apiServiceDelegator from "../components/ApiServiceDelegator";
 import { SyntheticEvent } from "react";
+import axios from "axios";
 
 
 const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
@@ -80,16 +81,31 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
           }
         }, () => {
           let formData = this.state.formData;
-          apiServiceDelegator
-          .getArbitraryService(service)?.invoke(formData)
-          .subscribe({
-            next: (data: any) => {
-              console.log(data);
-            },
-            error: error => {
-              console.log(error);
+          this.appContext()
+          .getTenantId()
+          .subscribe(
+            {
+              next: (tenantId: TenantIdResponse) => {
+                console.log(tenantId);
+                if(formData) {
+                  formData['tenant_id'] = tenantId.data;
+                }
+                apiServiceDelegator
+                .getArbitraryService(service)?.invoke(formData)
+                .subscribe({
+                  next: (data: any) => {
+                    console.log(data);
+                  },
+                  error: (error: any) => {
+                    this.onServiceCallErrorHandle(error);
+                  }
+                });
+              },
+              error: (error: any) => {
+                this.onServiceCallErrorHandle(error);
+              }
             }
-          });
+          )
         });
       } else {
         console.log('no service found');
@@ -104,12 +120,13 @@ const authWidgetFactory = (_widget: AppWidget): typeof BaseWidget => {
       console.log('authModal is ready');
     }
     doRender(): JSX.Element {
+      let logo = this.widget.parsedProp('logo_src');
       let dom: JSX.Element = (
         <div className="auth-modal-inner">
           { this.widget.prop("display_logo") && 
           <div>
             <div className="modal-logo-wrapper normal-size-logo">
-              <img src={`./icons/${this.widget.parsedProp('logo_src')}.svg`}></img>
+              <img src={`./icons/${logo}.svg`} alt={`${logo}`}></img>
             </div>
             <div className="welcome-msg-wrapper">
               <h1 className="welcome-msg">{ this.widget.prop('welcome_msg') }</h1>

@@ -1,7 +1,7 @@
 import './App.css';
 import apiServiceDelegator from './components/ApiServiceDelegator';
 import { resolveLayout } from './layouts/layouts';
-import { AppLayout, ErrorHandler } from './layouts/types';
+import { AppLayout } from './layouts/types';
 import { AppContext, appContext } from './AppContext';
 
 const PATH_NAME = window.location.pathname;
@@ -24,17 +24,11 @@ class App {
         {
           next: (data: AppLayout | null) => {
             console.log(data);
-            let errHandler: ErrorHandler | undefined = appContext.getErrorHandler();
             if(data) {
               let Layout = resolveLayout(data);
               let dom: JSX.Element =
                 <div className="App">
                   <Layout/>
-                  <div className='error-popup-wrapper'>
-                    {
-                      errHandler && errHandler.renderPopupList()
-                    }
-                  </div>
                 </div>
               callback(dom);
             }

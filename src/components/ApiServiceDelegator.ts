@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 import { HttpMethod } from "./AppService";
 import PageLayoutService from "./services/PageLayoutService";
-import { ApiDelegatorConfig, ApiDelegatorConfigurer } from "../layouts/types";
+import { ApiDelegatorConfigurer } from "../layouts/types";
 import UserPassLoginService from "./services/UserPassLoginService";
 import TenantService from "./services/TenantService";
 import ConstantService from "./services/ConstantService";
@@ -32,9 +32,6 @@ class ApiServiceDelegator {
       'method': HttpMethod.GET,
       'serviceId': 'tenant_id',
       //'uri': 'tenant/get-id-by-name',
-      'params': {
-        'name': '{tenant_name}'
-      }
     }));
   }
   static getApiServiceDelegator(): ApiServiceDelegator {

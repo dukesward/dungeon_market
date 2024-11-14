@@ -43,11 +43,6 @@ type SimpleMap<T> = {
   [key: string]: T
 }
 
-interface ErrorHandler {
-  handle(error: any): void
-  renderPopupList(): JSX.Element
-}
-
 class ApiDelegatorConfigurer {
   method: HttpMethod
   serviceId: string
@@ -231,11 +226,28 @@ class TenantIdResponse implements AppModel {
 class ErrorMessageWrapper implements AppModel {
   type: string
   errorCode: string
+  message?: string | null
   function: string
-  constructor(data: any) {
-    this.type = data.type;
-    this.errorCode = data.code;
-    this.function = data.function;
+  constructor(data: ServiceCallError) {
+    this.type = data.get('type');
+    this.errorCode = data.get('code');
+    this.message = appContext.getConstant('error_code', this.errorCode) || null;
+    this.function = data.name;
+  }
+}
+
+class ServiceCallError extends Error {
+  name: string
+  original: any
+  errorCode: string = '500'
+  type: string = 'simple'
+  constructor(message: string, public data?: any) {
+    super(message);
+    this.name = 'service_call';
+    this.original = data;
+  }
+  get(key: string) {
+    return this.original[key] || null;
   }
 }
 
@@ -250,7 +262,8 @@ export {
   UserPassLogin,
   TenantIdResponse,
   ApiDelegatorConfigurer,
-  ErrorMessageWrapper
+  ErrorMessageWrapper,
+  ServiceCallError
 };
 
 export type {
@@ -261,6 +274,5 @@ export type {
   WidgetWrapperMap,
   FeatureWrapperMap,
   UserPassAuthForm,
-  ApiDelegatorConfig,
-  ErrorHandler
+  ApiDelegatorConfig
 };

@@ -12,7 +12,6 @@ const bannerFactory = (_widget: AppWidget): typeof BaseWidget => {
       this.subtype = _widget.subtype;
     }
     doRender(): JSX.Element {
-      console.log('basic banner');
       let dom: JSX.Element = (
         <div className={`banner-${this.subtype}`}></div>
       )
@@ -36,7 +35,6 @@ const bannerFactory = (_widget: AppWidget): typeof BaseWidget => {
       return null;
     }
     doRender(): JSX.Element {
-      console.log('header banner');
       let dom: JSX.Element = (
         <div className={`banner-${this.subtype}`}>
           {this.renderHeaderLogo()}

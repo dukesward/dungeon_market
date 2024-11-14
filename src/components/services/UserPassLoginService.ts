@@ -13,9 +13,13 @@ class UserPassLoginService extends AppHttpServiceConsumer<UserPassLogin> {
   mapObject(data: any): UserPassLogin {
     return new UserPassLogin(data);
   }
-
   validate(data: any): boolean {
     return data && data.user && data.pass;
+  }
+  customHeaders(params: any): {} {
+    return {
+      'Tenant-Id': params.tenant_id || '0'
+    };
   }
 
 }

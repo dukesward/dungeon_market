@@ -21,7 +21,6 @@ function stringUtils() {
       let result: string = str;
       let iterator: IterableIterator<RegExpMatchArray> = str.matchAll(/{([^}]+)}/g);
       for(let m of iterator) {
-        console.log(m);
         if(m && (m[1] in target)) {
           result = result.replace(m[0].toString(), target[m[1]]);
         }

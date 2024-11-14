@@ -1,5 +1,6 @@
 import BaseLayout from "../BaseLayout";
 import { AppLayout } from "../types";
+import { ErrorMessagePrinter } from "../../../src/widgets/ErrorMessagePrinter";
 
 const topBannerLayout = (widgets: AppLayout) => {
   class TopBannerLayout extends BaseLayout {
@@ -16,6 +17,9 @@ const topBannerLayout = (widgets: AppLayout) => {
           <div className="layout-body-container">
             {this.wrappedWidget("menu", "sidebar")}
             {this.wrappedWidget("article", "canvas")}
+          </div>
+          <div className='error-popup-wrapper'>
+            <ErrorMessagePrinter/>
           </div>
         </div>
       )

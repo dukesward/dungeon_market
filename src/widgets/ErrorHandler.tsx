@@ -6,16 +6,17 @@ const errorMessageFactory = (_widget: AppWidget) => {
     type: string = "error_message";
     constructor(props: BaseWidgetProps) {
       super(props);
+      this.widget = _widget;
       this.subtype = _widget.subtype;
     }
     doConfigure(): void {
       console.log('errorWidget is ready');
     }
     doRender(): JSX.Element {
+      console.log(this.prop('error'));
       let dom: JSX.Element = (
         <div>
-          <h1>Error</h1>
-          <p>Something went wrong</p>
+          <p>{this.prop('error')?.message}</p>
         </div>
       );
       return dom;

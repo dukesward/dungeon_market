@@ -1,6 +1,6 @@
+import { Observable, tap } from "rxjs";
 import apiServiceDelegator from "./components/ApiServiceDelegator";
-import ErrorMessagePrinter from "./widgets/ErrorMessagePrinter";
-import { ErrorHandler, ErrorMessageWrapper, SimpleMap } from "./layouts/types";
+import { ErrorMessageWrapper, ServiceCallError, SimpleMap, TenantIdResponse } from "./layouts/types";
 
 const env = require('./env.json');
 const env_configs = env['APP_ENV_CONFIGS'][env['APP_ENV']];
@@ -24,17 +24,16 @@ export const CACHE_KEY: {[key: string]: string} = {
 
 class AppContext {
   appConstants: SimpleMap<SimpleMap<string>> = {}
-  errorHandler: ErrorHandler = new ErrorMessagePrinter();
+  errorMessages: ErrorMessageWrapper[] = []
+  stateHooks: {[key: string]: (data: any) => void} = {}
   initialize(
     callback?: () => void,
-    error?: ErrorMessageWrapper) {
+    errorHandle?: (err: any) => void) {
     apiServiceDelegator.getService(
       'error_code_constants',
       { 'app_locale_id': appContext.envVar('APP_LOCALE_ID') }
-
     ).subscribe({
       next: (data: SimpleMap<string>) => {
-        console.log(data);
         if(data) {
           // 初始化错误码
           this.appConstants['error_code'] = data;
@@ -44,7 +43,7 @@ class AppContext {
       error: error => {
         console.log(error);
         if(error) {
-          this.errorHandler.handle(error);
+          errorHandle && errorHandle(error);
         }
       }
     });
@@ -56,17 +55,44 @@ class AppContext {
   envConfigs(): any {
     return env_configs;
   }
-  getWebCache = (key: string) => {
+  getWebCache(key: string): string | null {
     return localCache.getItem(CACHE_KEY[key]);
   }
-  setWebCache = (key: string, val: string) => {
+  setWebCache(key: string, val: string): void {
     localCache.setItem(CACHE_KEY[key], val);
   }
-  getConstant = (type: string, key: string): string | null => {
+  getConstant(type: string, key: string): string | null {
     return this.appConstants[type] ? this.appConstants[type][key] : null;
   }
-  getErrorHandler = () => {
-    return this.errorHandler;
+  hookState(key: string, val: (data: any) => void): void {
+    this.stateHooks[key] = val;
+  }
+  handleServiceCallError(e: ServiceCallError) {
+    if(this.stateHooks['error_message']) {
+      this.stateHooks['error_message'](e);
+    }
+  }
+  getTenantId(): Observable<TenantIdResponse> {
+    let tenantId: string = this.getWebCache(CACHE_KEY.TenantId) || '';
+    if(tenantId) {
+      return new Observable<TenantIdResponse>(observer => {
+        observer.next({
+          code: 0,
+          data: parseInt(tenantId),
+          msg:'success'
+        });
+        observer.complete();
+      });
+    }else {
+      return apiServiceDelegator.getService(
+        'tenant_id',
+        {}
+      ).pipe(
+        tap((data: TenantIdResponse) => {
+          this.setWebCache(CACHE_KEY.TenantId, data.data.toString());
+        })
+      );
+    }
   }
 }
 

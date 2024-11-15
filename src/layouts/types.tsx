@@ -224,10 +224,12 @@ class AuthTokenEntity implements AppModel {
   access_token: string
   refresh_token: string
   expires_in: number
+  user_id: number
   constructor(data: any) {
-    this.access_token = data.access_token;
-    this.refresh_token = data.refresh_token;
-    this.expires_in = data.expires_in;
+    this.user_id = data.userId;
+    this.access_token = data.accessToken;
+    this.refresh_token = data.refreshToken;
+    this.expires_in = data.expiresTime;
   }
 }
 

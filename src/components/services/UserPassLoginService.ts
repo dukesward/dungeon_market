@@ -1,27 +1,25 @@
 import { UserPassLogin } from "../../../src/layouts/types";
-import { AppHttpServiceConsumer } from "../AppService";
-import { appContext } from "../../../src/AppContext";
+import { HttpMethod } from "../AppService";
 
-class UserPassLoginService extends AppHttpServiceConsumer<UserPassLogin> {
-  constructor() {
-    super();
-    this.api_app = appContext.envVar("API_APP_USER_BASE");
-    this.services = {
-      'user_pass_login': 'auth/simple/login'
+
+export const userPassLoginServiceProvider = (function () {
+  return {
+    'user_pass_login': {
+      uri: 'auth/simple/login',
+      method: HttpMethod.POST,
+      mapper: (data: any) => {
+        return new UserPassLogin(data);
+      },
+      validate: (data: any) => {
+        return data && data.user && data.pass;
+      },
+      payload: {
+        'email': '{email}',
+        'password': '{password}'
+      },
+      headers: {
+        'tenant_id': '{tenant_id}'
+      }
     }
-  }
-  mapObject(data: any): UserPassLogin {
-    return new UserPassLogin(data);
-  }
-  validate(data: any): boolean {
-    return data && data.user && data.pass;
-  }
-  customHeaders(params: any): {} {
-    return {
-      'Tenant-Id': params.tenant_id || '0'
-    };
-  }
-
-}
-
-export default UserPassLoginService;
+  };
+})();

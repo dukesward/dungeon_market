@@ -1,32 +1,20 @@
 import { Observable, tap } from "rxjs";
 import apiServiceDelegator from "./components/ApiServiceDelegator";
 import { ErrorMessageWrapper, ServiceCallError, SimpleMap, TenantIdResponse } from "./layouts/types";
+import { AppLogger, AppLoggerImpl } from "./utils/logger";
+import { CACHE_KEY, WebCacheBase, WebCacheKey } from "./utils/webCache";
+import { HashMap } from "./utils/hashmap";
 
 const env = require('./env.json');
 const env_configs = env['APP_ENV_CONFIGS'][env['APP_ENV']];
 
-const localCache = localStorage;
-
-export const CACHE_KEY: {[key: string]: string} = {
-  // 用户相关
-  ROLE_ROUTERS: 'roleRouters',
-  USER: 'user',
-  // 系统设置
-  IS_DARK: 'isDark',
-  LANG: 'lang',
-  THEME: 'theme',
-  LAYOUT: 'layout',
-  DICT_CACHE: 'dictCache',
-  // 登录表单
-  LoginForm: 'loginForm',
-  TenantId: 'tenantId',
-  AuthToken: 'authToken'
-}
+const logger: AppLogger = new AppLoggerImpl();
 
 class AppContext {
-  appConstants: SimpleMap<SimpleMap<string>> = {}
-  errorMessages: ErrorMessageWrapper[] = []
-  stateHooks: {[key: string]: (data: any) => void} = {}
+  private appConstants: SimpleMap<SimpleMap<string>> = {}
+  private errorMessages: ErrorMessageWrapper[] = []
+  private stateHooks: {[key: string]: (data: any) => void} = {}
+  private webCacheMap: Map<WebCacheKey, WebCacheBase> = new HashMap<WebCacheKey, WebCacheBase>();
   initialize(
     callback?: () => void,
     errorHandle?: (err: any) => void) {
@@ -51,12 +39,11 @@ class AppContext {
     console.log('appContext initialized');
   }
   async validateToken(): Promise<boolean> {
-    let token: string = this.getWebCache(CACHE_KEY.AuthToken) || '';
-    if(token) {
+    let cache: WebCacheBase | null = this.getWebCache("AuthToken");
+    if(cache && cache.exists()) {
       return true;
     }else {
       return false;
-    } {
     }
   }
   envVar(name: string): string {
@@ -65,11 +52,18 @@ class AppContext {
   envConfigs(): any {
     return env_configs;
   }
-  getWebCache(key: string): string | null {
-    return localCache.getItem(CACHE_KEY[key]);
+  getWebCache(key: keyof typeof CACHE_KEY): WebCacheBase | null {
+    let cacheKey: WebCacheKey = new WebCacheKey(key);
+    if(this.webCacheMap.has(cacheKey)) {
+      return this.webCacheMap.get(cacheKey)!;
+    }
+    return null;
   }
-  setWebCache(key: string, val: string): void {
-    localCache.setItem(CACHE_KEY[key], val);
+  setWebCache(key: string, val: string): WebCacheBase {
+    let cacheKey: WebCacheKey = new WebCacheKey(key);
+    let cache: WebCacheBase = new WebCacheBase(cacheKey);
+    this.webCacheMap.set(cacheKey, cache);
+    return cache;
   }
   getConstant(type: string, key: string): string | null {
     return this.appConstants[type] ? this.appConstants[type][key] : null;
@@ -83,12 +77,12 @@ class AppContext {
     }
   }
   getTenantId(params?: any): Observable<TenantIdResponse> {
-    let tenantId: string = this.getWebCache(CACHE_KEY.TenantId) || '';
-    if(tenantId) {
+    let cache: WebCacheBase | null = this.getWebCache("TenantId");
+    if(cache !== null && cache.exists()) {
       return new Observable<TenantIdResponse>(observer => {
         observer.next({
           code: 0,
-          data: parseInt(tenantId),
+          data: parseInt(cache!.get()!),
           msg:'success'
         });
         observer.complete();
@@ -105,7 +99,19 @@ class AppContext {
     }
   }
   isPostLogin(): boolean {
-    return this.getWebCache('AuthToken') !== null;
+    let cache: WebCacheBase | null = this.getWebCache("AuthToken");
+    if(!cache || !cache.exists())
+      return false;
+    try {
+      let tokenData = JSON.parse(cache.get()!);
+      if(tokenData.expiresTime < Date.now()) {
+        logger.warn('token expired');
+        return false;
+      }
+    }catch(e) {
+      return false;
+    }
+    return true;
   }
 }
 

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "test-ts": "tsc tests/index.test.ts",
     "start-server": "npx ts-node app/app.ts",
     "start-web": "react-scripts start",
     "build-web": "react-scripts build",

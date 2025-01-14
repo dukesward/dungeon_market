@@ -1,26 +1,21 @@
 import { SimpleMap } from "@/src/layouts/types";
-import { AppHttpServiceConsumer } from "../AppService";
+import { HttpMethod } from "../AppService";
 
-class ConstantService extends AppHttpServiceConsumer<SimpleMap<string>> {
-  constructor() {
-    super();
-    this.services = {
-      'error_code_constants': 'static/constants/{app_locale_id}/errorCodes.json'
+export const constantServiceProvider = (function () {
+  return {
+    'error_code_constants': {
+      uri: 'static/constants/{app_locale_id}/errorCodes.json',
+      method: HttpMethod.GET,
+      mapper: (data: any) => {
+        let map: SimpleMap<string> = {};
+        Object.keys(data).forEach(key => {
+          map[key] = '' + data[key];
+        });
+        return map;
+      },
+      validate: (data: any) => {
+        return Object.keys(data).length > 0;
+      },
     }
-  }
-
-  mapObject(data: any): SimpleMap<string> {
-    let map: SimpleMap<string> = {};
-    Object.keys(data).forEach(key => {
-      map[key] = '' + data[key];
-    });
-    return map;
-  }
-
-  validate(data: any): boolean {
-    return Object.keys(data).length > 0;
-  }
-
-}
-
-export default ConstantService;
+  };
+})();

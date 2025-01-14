@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Observable, defer, map, share } from "rxjs";
 import { appContext } from "../AppContext";
-import { ApiDelegatorConfig, ServiceCallError } from "../layouts/types";
+import { ApiDelegatorConfig, ServiceCallError, UnaryMapper } from "../layouts/types";
+import AppModel from "./AppModel";
 
 enum HttpMethod {
   GET = "GET",
@@ -10,28 +11,34 @@ enum HttpMethod {
   DELETE = "DELETE"
 }
 
-type HttpRequest<T> = {
-  url?: string
-  data?: Observable<T>
-  error?: any
+type HttpResError = {
+  code: number
+  message: string
 }
 
-abstract class AppHttpServiceConsumer<T> {
+type HttpRequest<T, P> = {
+  api?: string
+  uri: string
+  data?: Observable<T>
+  method: HttpMethod
+  payload?: P
+  headers?: {[key: string]: string}
+  params?: any
+  validate: UnaryMapper<T>
+  error?: HttpResError
+  callback?: (data: T) => any
+  mapper: (data: any) => T
+}
+
+class AppHttpServiceConsumer {
   api_base: string
   api_app?: string
-  last_call: HttpRequest<T>
-  next_fetch: {[page_name: string]: Observable<T | null>}
+  last_call: HttpRequest<any, any> | null
+  next_fetch?: {[page_name: string]: Observable<any | null>}
   services: {[service_id: string]: string} = {}
   constructor() {
     this.api_base = appContext.envVar('APP_SERVER_API_BASE');
-    this.last_call = {}
-    this.next_fetch = {};
-  }
-
-  abstract mapObject(data: any): T;
-
-  validate(data: any): boolean {
-    return data && data.contents && Object.keys(data.contents).length > 0;
+    this.last_call = null;
   }
 
   getServiceUri(api: string): string {
@@ -67,40 +74,41 @@ abstract class AppHttpServiceConsumer<T> {
     return {};
   }
   
-  doFetch(
-    apiConfig: ApiDelegatorConfig,
-    callback?: (t: T) => any): Observable<T | null> {
-    let {uri, method, params, payload, headers} = apiConfig;
-    params = this.customParams(params);
+  doFetch<T extends AppModel, P>(
+    request: HttpRequest<T, P>): Observable<T | null> {
+    // let {uri, method, params, payload, headers} = apiConfig;
+    let params = this.customParams(request.params);
     return defer(() => axios({
-      'url': this.buildUrl(uri, params),
-      'method': method.toString(),
-      'headers': {...this.customHeaders(headers), ...{
+      'url': this.buildUrl(request.uri, params),
+      'method': request.method.toString(),
+      'headers': {...this.customHeaders(request.headers), ...{
         "Content-Type": "application/json"
       }},
-      'data': payload
+      'data': request.payload
     })).pipe(
       map(res => res.data),
       map(data => {
-        if(!this.validate(data)) {
+        if(!request.validate(data)) {
           // this.last_call.error = new Error("data_invalid");
-          throw this.last_call.error || new ServiceCallError("data_invalid", data);
+          throw (this.last_call && this.last_call.error) 
+            || new ServiceCallError("data_invalid", data);
         }
-        return this.mapObject(data);
+        return request.mapper(data);
       }),
       map(data => {
-        if(callback) {
-          return callback(data);
+        if(request.callback) {
+          return request.callback(data);
         }
         return data;
       })
     );
   };
 
-  nextFetch(id: string, apiConfig: ApiDelegatorConfig): Observable<T | null> {
-    if(!this.next_fetch[id]) {
+  nextFetch<T extends AppModel, P>(id: string, request: HttpRequest<T, P>): 
+    Observable<T | null> {
+    if(this.next_fetch && !this.next_fetch[id]) {
       this.next_fetch[id] = this
-      .doFetch(apiConfig)
+      .doFetch(request)
       .pipe(
         map(data => {
           console.log(data);
@@ -109,9 +117,15 @@ abstract class AppHttpServiceConsumer<T> {
         share()
       );
     }
-    return this.next_fetch[id];
+    return defer(() => {
+      return this.next_fetch![id];
+    });
   }
 }
+
+export type {
+  HttpRequest
+};
 
 export {
   AppHttpServiceConsumer,

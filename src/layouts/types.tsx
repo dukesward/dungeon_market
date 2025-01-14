@@ -4,8 +4,16 @@ import { BaseWidget } from "../widgets/BaseWidget";
 import stringUtils from "../utils/stringUtils";
 import { appContext } from "../AppContext";
 import commonUtils from "../utils/commonUtils";
-import { AppHttpServiceConsumer, HttpMethod } from "../components/AppService";
+import { AppHttpServiceConsumer, HttpMethod, HttpRequest } from "../components/AppService";
 import { Observable } from "rxjs";
+
+type Consumer<T> = (t: T) => void;
+type Mapper<S, T> = (s: S) => T;
+type UnaryMapper<T> = Mapper<T, T>;
+
+type Dictionary<T> = {
+  [key: string]: T
+}
 
 type LayoutMap = {
   [layout: string]: typeof BaseLayout
@@ -32,60 +40,64 @@ type UserPassAuthForm = {
   password: string
 }
 
-type ApiDelegatorConfig = {
+type ApiServicePayload<T> = {
+  payload: T
+}
+
+type ApiDelegatorConfig<T> = {
   method: HttpMethod,
   uri: string,
   params: any,
-  payload: any,
-  headers: any
+  payload: ApiServicePayload<T>,
+  headers: string[]
 }
 
 type SimpleMap<T> = {
   [key: string]: T
 }
 
-class ApiDelegatorConfigurer {
-  method: HttpMethod
+
+class ApiDelegatorConfigurer<T extends AppModel, P extends object> {
+  service: AppHttpServiceConsumer
   serviceId: string
-  service: AppHttpServiceConsumer<any>
-  params?: any = {}
-  payload?: any = {}
-  headers?: any = {}
-  constructor(config: any) {
-    this.method = config.method;
-    this.serviceId = config.serviceId;
-    this.service = config.service;
-    if(config.params) this.params = config.params;
-    if(config.payload) this.payload = config.payload;
-    if(config.headers) this.headers = config.headers;
+  request: HttpRequest<T, P>
+  constructor(
+    request: HttpRequest<T, P>, serviceId: string) {
+    this.serviceId = serviceId;
+    this.service = new AppHttpServiceConsumer();
+    this.request = request;
   }
   invoke(params?: any): Observable<any> {
     let uri = this.service.getServiceUri(this.serviceId);
+    let request = this.request;
+    request.api = request.api || 'app';
+    request.params = request.params || {};
     if(params) {
       uri = stringUtils.parseString(uri, params);
-      Object.keys(this.params).forEach(key => {
+      Object.keys(request.params).forEach(key => {
         if(params[key]) {
-          this.params[key] = stringUtils.parseString(this.params[key], params);
+          request.params[key] = stringUtils.parseString(request.params[key], params);
         };
       });
-      Object.keys(this.payload).forEach(key => {
-        if(typeof params[key] !== 'undefined') {
-          this.payload[key] = params[key];
-        };
-      });
-      Object.keys(this.headers).forEach(key => {
-        if(typeof params[key] !== 'undefined') {
-          this.headers[key] = params[key];
-        };
-      });
+      if(request.payload) {
+        let payload: P = request.payload;
+        Object.keys(payload).forEach(
+          (key) => {
+            if(typeof params[key] !== 'undefined') {
+              payload[key as keyof P] = params[key];
+            }
+          }
+        )
+      }
+      if(request.headers) {
+        Object.keys(request.headers).forEach(key => {
+          if(typeof params[key] !== 'undefined') {
+            request.headers![key] = params[key];
+          };
+        });
+      }
     }
-    return this.service.doFetch({
-      method: this.method,
-      uri: uri,
-      params: this.params,
-      payload: this.payload,
-      headers: this.headers
-    });
+    return this.service.doFetch(this.request);
   }
 }
 
@@ -290,7 +302,12 @@ export {
 };
 
 export type {
+  Consumer,
+  Mapper,
+  UnaryMapper,
+  Dictionary,
   SimpleMap,
+  ApiServicePayload,
   LayoutMap,
   LayoutWrapperMap,
   WidgetMap,

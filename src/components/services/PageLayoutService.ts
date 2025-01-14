@@ -1,24 +1,18 @@
-import { ApiDelegatorConfig, AppLayout } from "../../layouts/types";
-import { AppHttpServiceConsumer, HttpMethod } from "../AppService";
+import { AppLayout } from "../../layouts/types";
+import { HttpMethod } from "../AppService";
 
-
-class PageLayoutService extends AppHttpServiceConsumer<AppLayout> {
-  constructor() {
-    super();
-    this.services = {
-      'page_layout': 'static/layouts/{layout_id}.json'
+export const pageLayoutServiceProvider = (function () {
+  return {
+    'page_layout': {
+      uri: 'static/layouts/{layout_id}.json',
+      method: HttpMethod.GET,
+      mapper: (data: any) => {
+        let appLayout: AppLayout = new AppLayout(data);
+        return appLayout;
+      },
+      validate: (data: any) => {
+        return data && data.page_name;
+      },
     }
-  }
-
-  mapObject(data: any): AppLayout {
-    let appLayout: AppLayout = new AppLayout(data);
-    return appLayout;
   };
-
-  validate(data: any): boolean {
-    return data && data.page_name;
-  }
-}
-
-
-export default PageLayoutService;
+})();

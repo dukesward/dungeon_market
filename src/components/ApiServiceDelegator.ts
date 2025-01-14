@@ -1,58 +1,31 @@
 import { Observable } from "rxjs";
-import { HttpMethod } from "./AppService";
-import PageLayoutService from "./services/PageLayoutService";
-import { ApiDelegatorConfigurer } from "../layouts/types";
-import UserPassLoginService from "./services/UserPassLoginService";
-import TenantService from "./services/TenantService";
-import ConstantService from "./services/ConstantService";
-import AuthTokenService from "./services/AuthTokenService";
+import { HttpRequest } from "./AppService";
+import { ApiDelegatorConfigurer, Dictionary } from "../layouts/types";
+import { userPassLoginServiceProvider } from "./services/UserPassLoginService";
+import { tenantServiceProvider } from "./services/TenantService";
+import { constantServiceProvider } from "./services/ConstantService";
+import AppModel from "./AppModel";
+import { pageLayoutServiceProvider } from "./services/PageLayoutService";
+import { authTokenServiceProvider } from "./services/AuthTokenService";
 
 class ApiServiceDelegator {
   static delegator: ApiServiceDelegator
-  services: {[service_id: string]: ApiDelegatorConfigurer}
+  services: {[service_id: string]: ApiDelegatorConfigurer<any, any>}
   private constructor() {
     this.services = {};
-    this.registerService('error_code_constants', new ApiDelegatorConfigurer({
-      'service': new ConstantService(),
-      'method': HttpMethod.GET,
-      'serviceId': 'error_code_constants'
-    }));
-    this.registerService('page_layout', new ApiDelegatorConfigurer({
-      'service': new PageLayoutService(),
-      'method': HttpMethod.GET,
-      'serviceId': 'page_layout'
-    }));
-    this.registerService('user_pass_login', new ApiDelegatorConfigurer({
-      'service': new UserPassLoginService(),
-      'method': HttpMethod.POST,
-      'serviceId': 'user_pass_login',
-      'payload': {
-        'email': '{email}',
-        'password': '{password}'
-      },
-      'headers': {
-        'tenant_id': '{tenant_id}'
-      }
-      //'uri': "auth/simple/login"
-    }));
-    this.registerService('tenant_id', new ApiDelegatorConfigurer({
-      'service': new TenantService(),
-      'method': HttpMethod.GET,
-      'serviceId': 'tenant_id',
-      //'uri': 'tenant/get-id-by-name',
-    }));
-    this.registerService('validate_token', new ApiDelegatorConfigurer({
-      'service': new AuthTokenService(),
-      'method': HttpMethod.POST,
-      'serviceId': 'validate_token',
-    }));
+    this.registerService(constantServiceProvider);
+    this.registerService(pageLayoutServiceProvider);
+    this.registerService(userPassLoginServiceProvider);
+    this.registerService(tenantServiceProvider);
+    this.registerService(authTokenServiceProvider);
   }
   static getApiServiceDelegator(): ApiServiceDelegator {
     if(!this.delegator) this.delegator = new ApiServiceDelegator();
     return this.delegator;
   }
-  getArbitraryService(id: string, factory?: () => ApiDelegatorConfigurer): 
-    ApiDelegatorConfigurer {
+  getArbitraryService<T extends AppModel, P extends object>(
+    id: string, factory?: () => ApiDelegatorConfigurer<T, P>): 
+    ApiDelegatorConfigurer<T, P> {
     if(!this.services[id] && factory) {
       this.services[id] = factory();
     }
@@ -61,8 +34,11 @@ class ApiServiceDelegator {
   getService(id: string, params: any): Observable<any> {
     return this.getArbitraryService(id).invoke(params);
   }
-  registerService(id: string, service: ApiDelegatorConfigurer): void {
-    this.services[id] = service;
+  registerService(
+    services: Dictionary<HttpRequest<any, any>>): void {
+    Object.keys(services).forEach(key => {
+      this.services[key] = new ApiDelegatorConfigurer(services[key], key);
+    });
   }
 }
 

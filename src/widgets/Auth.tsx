@@ -4,7 +4,6 @@ import "./styles/common.css";
 import "./styles/auth.css";
 import apiServiceDelegator from "../components/ApiServiceDelegator";
 import { SyntheticEvent } from "react";
-import axios from "axios";
 import commonUtils from "../utils/commonUtils";
 
 

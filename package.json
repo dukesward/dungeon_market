@@ -10,6 +10,7 @@
     "test-web": "react-scripts test"
   },
   "dependencies": {
+    "@babel/eslint-parser": "^7.25.9",
     "@reduxjs/toolkit": "^2.2.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -17,6 +18,7 @@
     "@types/react": "^18.2.75",
     "@types/react-dom": "^18.2.24",
     "axios": "^1.6.8",
+    "babel-eslint": "^10.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mongoose": "^8.5.2",
@@ -28,16 +30,13 @@
     "require-context": "^1.1.0",
     "rxjs": "^7.8.1",
     "twilio": "^5.2.2",
-    "web-vitals": "^2.1.4",
-    "dva-core": "^2.0.4",
-    "dva-immer": "^0.5.2"
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.4",
     "pino": "^9.4.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
@@ -48,7 +47,11 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+      "requireConfigFile": false
+    }
   },
   "browserslist": {
     "production": [

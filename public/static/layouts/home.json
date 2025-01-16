@@ -27,6 +27,7 @@
 						"position": "header-corner",
 						"subtype": "auth-corner",
 						"props": {
+							"post-login": false,
 							"login-button": {
 								"copy": "Log in"
 							}
@@ -78,6 +79,24 @@
 										]
 									}
 								]
+							}
+						]
+					},
+					{
+						"type": "auth",
+						"widget_id": "header-authbox",
+						"position": "header-corner",
+						"subtype": "user-corner",
+						"props": {
+							"post-login": true
+						},
+						"children": [
+							{
+								"type": "alert",
+								"widget_id": "alert-messages",
+								"subtype": "header-alert",
+								"props": {},
+								"children": []
 							}
 						]
 					},
